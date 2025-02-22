@@ -37,6 +37,6 @@ while True:
         else:
             print("Invalid choice")
             continue
-    except:
-        print("Invalid input")
+    except Exception as e:
+        print(e)
         continue

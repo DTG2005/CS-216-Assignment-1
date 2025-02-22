@@ -2,7 +2,7 @@ import socket
 import threading
 
 class Node:
-    def __init__(self, port):
+    def __init__(self, port, peername):
         self.host = "0.0.0.0"
         self.port = port
         self.peers = []  # Store connections to peers
@@ -18,7 +18,7 @@ class Node:
                 conn, addr = server_socket.accept()
                 print(f"Connected to {addr}")
                 if not conn in self.peers:
-                    self.peers.append(conn)
+                    self.peers.append([conn, conn.getpeername()])
                 threading.Thread(target=self.handle_peer, args=(conn,)).start()
             except:
                 print("Error accepting connection.")
@@ -28,7 +28,7 @@ class Node:
             try:
                 data = conn.recv(1024).decode()
                 if data:
-                    print(f"{self.host} Received from {conn.getsockname()}: {data}")
+                    print(f"{conn.getsockname()} {data}")
                 else:
                     break
             except:
@@ -39,6 +39,7 @@ class Node:
 # CLIENT
     def connect_to_peer(self, peer_host, peer_port):
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client_socket.settimeout(600)
         client_socket.connect((peer_host, peer_port))
         self.peers.append(client_socket)
         print(f"Connected to peer {peer_host}:{peer_port}")
