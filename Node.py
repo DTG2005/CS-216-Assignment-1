@@ -2,7 +2,7 @@ import socket
 import threading
 
 class Node:
-    def __init__(self, port, peername):
+    def __init__(self, port):
         self.host = "0.0.0.0"
         self.port = port
         self.peers = []  # Store connections to peers
@@ -18,17 +18,21 @@ class Node:
                 conn, addr = server_socket.accept()
                 print(f"Connected to {addr}")
                 if not conn in self.peers:
-                    self.peers.append([conn, conn.getpeername()])
+                    self.peers.append([conn, conn.getsockname()])
                 threading.Thread(target=self.handle_peer, args=(conn,)).start()
             except:
                 print("Error accepting connection.")
+    
+    def broadcast_peers(self):
+        for peer in self.peers:
+            print(peer[1])
 
     def handle_peer(self, conn:socket.socket):
         while True:
             try:
                 data = conn.recv(1024).decode()
                 if data:
-                    print(f"{conn.getsockname()} {data}")
+                    print(f"{data}")
                 else:
                     break
             except:
@@ -44,10 +48,19 @@ class Node:
         self.peers.append(client_socket)
         print(f"Connected to peer {peer_host}:{peer_port}")
         threading.Thread(target=self.handle_peer, args=(client_socket,)).start()
+        peer_list = [peer[1] for peer in self.peers if peer[1] != peer_host+":"+str(peer_port)]
+        client_socket.sendall(str(peer_list).encode())
+
 
     def send_message(self, message):
+        socket_address = (""+ self.host + self.port)
+        
+        # One can take input from the user on Node creation for the team name. Here, we're hardcoding it.
+                
+        team_name = "Blockbros"
         for peer in self.peers:
             try:
+                message = socket_address + " " + team_name + ' ' + message
                 peer.sendall(message.encode())
             except:
                 print("Failed to send message.")
