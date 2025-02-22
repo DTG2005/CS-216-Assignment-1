@@ -3,40 +3,49 @@ import threading
 
 Name = input("Enter your name: ")
 Port = int(input("Enter your port number: "))
-print("Server listening on port ", Port)
 
+print(f"🚀 Server starting on port {Port}...")
 Node1 = Node.Node(Port, Name)
-threading.Thread(target=Node1.start_server).start()
+
+# Start the server thread
+threading.Thread(target=Node1.start_server, daemon=True).start()
 
 while True:
-    print("*** Menu ***")
+    print("\n*** Menu ***")
     print("1. Send Message")
     print("2. Query Active Peers")
-    print("3. Connect to active peers")
+    print("3. Connect to Active Peers")
     print("0. Quit")
 
     try:
-        choice = int(input())
-        if(choice == 0):
+        choice = int(input("Enter choice: "))
+        
+        if choice == 0:
+            print("Exiting...")
             break
-        elif(choice == 3):
+        
+        elif choice == 3:
             try:
-                host = input("Enter the host: ")
-                port = int(input("Enter the port: "))
-            except:
-                print("Invalid input")
-                continue
-            else:
+                host = input("Enter the peer IP: ")
+                port = int(input("Enter the peer port: "))
                 Node1.connect_to_peer(host, port)
-                print("Connected to ", host, ":", port)
-        elif(choice == 2):
-            print("Active Peers: ", Node1.peers)
-        elif(choice == 1):
-            message = input("Enter the message: ")
+            except ValueError:
+                print("❌ Invalid input. Please enter a valid IP and port.")
+
+        elif choice == 2:
+            print("🔄 Active Peers:")
+            if Node1.peers:
+                for i, peer in enumerate(Node1.peers, 1):
+                    print(f"{i}. {peer.getpeername()}")
+            else:
+                print("No active peers.")
+
+        elif choice == 1:
+            message = input("Enter your message: ")
             Node1.send_message(message)
+
         else:
-            print("Invalid choice")
-            continue
+            print("❌ Invalid choice, try again.")
+    
     except Exception as e:
-        print(e)
-        continue
+        print(f"⚠ Error: {e}")
