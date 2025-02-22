@@ -2,16 +2,16 @@ import socket
 import threading
 
 class Node:
-    def __init__(self, port):
+    def __init__(self, port, name):
         self.host = "0.0.0.0"
         self.port = port
+        self.name = name
         self.peers = []  # Store connections to peers
 # SERVER
     def start_server(self):
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_socket.bind((self.host, self.port))
         server_socket.listen(5)
-        print(f"Node started at {self.host}:{self.port} and listening for connections...")
 
         while True:
             try:
@@ -53,14 +53,11 @@ class Node:
 
 
     def send_message(self, message):
-        socket_address = (""+ self.host + self.port)
-        
-        # One can take input from the user on Node creation for the team name. Here, we're hardcoding it.
-                
-        team_name = "Blockbros"
+        socket_address = f"{self.host}:{self.port}"
+
         for peer in self.peers:
             try:
-                message = socket_address + " " + team_name + ' ' + message
+                message = socket_address + " " + self.name + ' ' + message
                 peer.sendall(message.encode())
             except:
                 print("Failed to send message.")

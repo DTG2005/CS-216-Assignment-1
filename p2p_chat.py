@@ -5,7 +5,7 @@ Name = input("Enter your name: ")
 Port = int(input("Enter your port number: "))
 print("Server listening on port ", Port)
 
-Node1 = Node.Node(Port)
+Node1 = Node.Node(Port, Name)
 threading.Thread(target=Node1.start_server).start()
 
 while True:
