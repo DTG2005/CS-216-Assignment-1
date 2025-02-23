@@ -47,12 +47,12 @@ class Node:
             client_socket.connect((peer_host, peer_port))
             self.peers.append(client_socket)  # Store socket connection
             print(f"✅ Connected to peer {peer_host}:{peer_port}")
-            threading.Thread(target=self.handle_peer, args=(client_socket,)).start()
+            threading.Thread(target=self.handle_peer, args=(client_socket,)).start()            
         except Exception as e:
             print(f"❌ Failed to connect to {peer_host}:{peer_port} - {e}")
 
     def send_message(self, message):
-        formatted_message = f"{self.name}: {message}"
+        formatted_message = f"{self.host}:{self.port} {self.name} {message}"
         for peer in self.peers:
             try:
                 peer.sendall(formatted_message.encode())
