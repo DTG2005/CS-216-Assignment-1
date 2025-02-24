@@ -1,4 +1,4 @@
-# Assignment 1
+# Assignment 1 - Team <ins>Blockbros</ins>
 
 ## Problem Statement
 

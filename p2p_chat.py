@@ -28,7 +28,7 @@ while True:
             break
         
         elif choice == 3:
-            Node1.connect_to_active_peers()
+            Node1.connect_to_active_peers_wrapped()
 
         elif choice == 2:
             print("🔄 Active Peers:")
@@ -48,7 +48,7 @@ while True:
                     recipient_port = int(input("Enter recipient's Port: "))
                 else:
                     recipient_ip, recipient_port = list(Node1.active_connections.keys())[choice - 1]
-            Node1.send_message(recipient_ip, recipient_port, port)
+            Node1.send_message(recipient_ip, recipient_port)
 
         else:
             print("❌ Invalid choice, try again.")

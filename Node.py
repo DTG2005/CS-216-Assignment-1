@@ -1,5 +1,14 @@
 import socket
 import threading
+import time
+
+def connecting_animation(process: threading.Thread):
+    i = 0
+    while process.is_alive():
+        for i in range(4):
+            print(f"Connecting{'.' * i}", end="\r")
+            time.sleep(0.5)
+    print("\n")
 
 class Node:
     def __init__(self, host, port, name):
@@ -38,17 +47,17 @@ class Node:
             if sender_port:
                 self.active_peers[client_address[0]] = sender_port
                 self.received_from.add((client_address[0], sender_port))
-                print(f"🔵 Connected to {client_address[0]}:{sender_port}")
+                print(f"Connected to {client_address[0]}:{sender_port}")
                 print(f"DEBUG: Adding to received_from -> IP: {client_address[0]}, Port: {sender_port}")
                 print(f"DEBUG: Current received_from set: {self.received_from}")
 
                 if len(data_parts) > 1:
                     message = data_parts[1].strip()
-                    print(f"📩 Received from {client_address[0]}:{sender_port}: {message}")
-                    client_socket.sendall(f"✅ Message received".encode())
+                    print(f"Received from {client_address[0]}:{sender_port}: {message}")
+                    client_socket.sendall(f"Message received".encode())
 
             else:
-                print(f"⚠ Invalid sender port received from {client_address[0]}: {sender_port_data}")
+                print(f"Invalid sender port received from {client_address[0]}: {sender_port_data}")
                 return
 
             while True:
@@ -57,16 +66,16 @@ class Node:
                     continue
 
                 if message.lower() == "exit":
-                    print(f"🔴 Client {client_address[0]}:{sender_port} disconnected.")
+                    print(f"Client {client_address[0]}:{sender_port} disconnected.")
                     self.active_connections.pop((client_address[0], sender_port), None)
                     break
 
                 self.received_from.add((client_address[0], sender_port))
-                print(f"📩 Received from {client_address[0]}:{sender_port}: {message}")
-                client_socket.sendall(f"✅ Message received".encode())
+                print(f"Received from {client_address[0]}:{sender_port}: {message}")
+                client_socket.sendall(f"Message received".encode())
 
         except Exception as e:
-            print(f"⚠ Connection error with {client_address[0]}: {e}")
+            print(f"Connection error with {client_address[0]}: {e}")
         finally:
             client_socket.close()
 
@@ -87,14 +96,13 @@ class Node:
                 client_socket.sendall(f"{self.port}\nCONNECT\n".encode())
                 self.active_connections[(peer_host, peer_port)] = client_socket
                 self.received_from.add((peer_host, peer_port))
-                print(f"✅ Successfully connected to {peer_host}:{peer_port}")
+                print(f"Successfully connected to {peer_host}:{peer_port}")
             else:
                 print(f"Already connected to {peer_host}:{peer_port}")
         except Exception as e:
-            print(f"❌ Error connecting to {peer_host}:{peer_port} - {e}")
+            print(f"Error connecting to {peer_host}:{peer_port} - {e}")
 
     def connect_to_active_peers(self):
-        print("\n🔄 Connecting to active peers...\n")
         X = list(self.received_from)
 
         for ip, port in X:
@@ -104,53 +112,63 @@ class Node:
                     client_socket.connect((ip, port))
                     client_socket.sendall(f"{self.port}\nCONNECT\n".encode())
                     self.active_connections[(ip, port)] = client_socket
-                    print(f"✅ Successfully connected to {ip}:{port}")
+                    print(f"Successfully connected to {ip}:{port}")
 
                     ack = client_socket.recv(1024).decode().strip()
-                    print(f"📩 Received from {ip}:{port}: {ack}")
+                    print(f"Received from {ip}:{port}: {ack}")
 
                 except Exception as e:
-                    print(f"❌ Error connecting to {ip}:{port} - {e}")
+                    print(f"Error connecting to {ip}:{port} - {e}")
 
         if not X:
             print("No active peers to connect to.")
         else:
             print("Finished connecting to active peers.")
 
-    def send_message(self, ip, port, message):
+    def connect_to_active_peers_wrapped(self):
+        process = threading.Thread(target=self.connect_to_active_peers)
+        process.start()
+        connecting_animation(process)
+
+    def connect_to_peer_wrapped(self, ip, port):
+        process = threading.Thread(target=self.connect_to_peer, args=(ip, port))
+        process.start()
+        connecting_animation(process)
+
+    def send_message(self, ip, port):
         if (ip, port) not in self.active_connections:
-            self.connect_to_peer(ip, port, self.port)
+            self.connect_to_peer_wrapped(ip, port)
 
         if (ip, port) in self.active_connections:
             conn = self.active_connections[(ip, port)]
             while True:
-                message = input("Enter message (type 'exit' to disconnect, 'menu' for options): ")
+                message = input("Enter message ('exit' to disconnect, 'menu' for options): ")
                 if message.lower() == 'menu':
                     break
                 elif message.lower() == "exit":
                     conn.close()
                     self.active_connections.pop((ip, port), None)
-                    print(f"🔴 Disconnected from {ip}:{port}")
+                    print(f"Disconnected from {ip}:{port}")
                     break
                 try:
                     conn.sendall(f"{self.host}:{self.port} {self.name} {message}\n".encode())
                     ack = conn.recv(1024).decode().strip()
-                    print(f"✅ Acknowledgment from {ip}:{port} - {ack}")
+                    print(f"Ack received from {ip}:{port} - {ack}")
                 except Exception as e:
-                    print(f"❌ Error sending message to {ip}:{port} - {e}")
+                    print(f"Error sending message to {ip}:{port} - {e}")
                     conn.close()
                     self.active_connections.pop((ip, port), None)
                     break
         else:
-            print(f"❌ Not connected to {ip}:{port}")
+            print(f"Not connected to {ip}:{port}")
 
     def send_mandatory_messages(self):
         for ip, port in self.MANDATORY_PEERS:
             try:
-                self.connect_to_peer(ip, port)
+                self.connect_to_peer_wrapped(ip, port)
                 if (ip, port) in self.active_connections:
                     conn = self.active_connections[(ip, port)]
                     conn.sendall(f"Auto Message\n".encode())
-                    print(f"✅ Mandatory message sent to {ip}:{port}")
+                    print(f"Mandatory message sent to {ip}:{port}")
             except Exception as e:
-                print(f"❌ Could not send mandatory message to {ip}:{port} - {e}")
+                print(f"Mandatory message unsent... target: {ip}:{port} - {e}")
