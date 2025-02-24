@@ -42,4 +42,10 @@ Enter the port: <Enter port>
 
 On correctly Entering both, you will be connected to the Node running this p2p script as well.
 
-_**Note:**_ Our code so far does **not** solve the bonus question.
+<ins>**Note:**</ins> Our code so far does solves the bonus question.
+
+## Team Members
+
+- **Dhriti Jha** - 230021007 - [Github](https://github.com/jhadhriti)
+- **Divyam Maru** - 230001025 - [Github](https://github.com/DTG2005)
+- **Abhinav Singh** - 230008002 - [Github](https://github.com/Abhinav072004)
