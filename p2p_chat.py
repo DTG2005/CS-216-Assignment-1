@@ -2,10 +2,11 @@ import Node
 import threading
 
 Name = input("Enter your name: ")
+Host = input("Enter your IP address: ")
 Port = int(input("Enter your port number: "))
 
 print(f"🚀 Server starting on port {Port}...")
-Node1 = Node.Node(Port, Name)
+Node1 = Node.Node(Host, Port, Name)
 
 # Start the server thread
 threading.Thread(target=Node1.start_server, daemon=True).start()
@@ -34,11 +35,7 @@ while True:
 
         elif choice == 2:
             print("🔄 Active Peers:")
-            if Node1.peers:
-                for i, peer in enumerate(Node1.peers, 1):
-                    print(f"{i}. {peer.getpeername()}")
-            else:
-                print("No active peers.")
+            Node1.query_peers()
 
         elif choice == 1:
             message = input("Enter your message: ")
