@@ -147,7 +147,7 @@ class Node:
     def send_mandatory_messages(self):
         for ip, port in self.MANDATORY_PEERS:
             try:
-                self.connect_to_peer(ip, port, self.port)
+                self.connect_to_peer(ip, port)
                 if (ip, port) in self.active_connections:
                     conn = self.active_connections[(ip, port)]
                     conn.sendall(f"Auto Message\n".encode())
