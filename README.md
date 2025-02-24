@@ -33,15 +33,6 @@ Server listening on port  8080
 
 You can use option 1 to send messages to active peers, 2 to query active peers and 3 to connect to active peers.
 
-On selecting option 3:-
-
-```sh
-Enter the host: <Enter host of the node you wish to connect to>
-Enter the port: <Enter port>
-```
-
-On correctly Entering both, you will be connected to the Node running this p2p script as well.
-
 <ins>**Note:**</ins> Our code so far does solves the bonus question.
 
 ## Team Members
